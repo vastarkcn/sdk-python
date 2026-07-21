@@ -1,39 +1,55 @@
-# sdk-python
+# vastark recaptcha Python SDK
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+## 安装
 
-#### 软件架构
-软件架构说明
+```bash
+pip install -e /path/to/sdk-python
+```
 
+依赖：`urllib3 >= 1.26.0`，无其他第三方依赖。
 
-#### 安装教程
+## 快速开始
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+```python
+from recaptcha import Client, Config, FailureMode, GenerateRequest
 
-#### 使用说明
+client = Client(Config(
+    base_url="http://127.0.0.1:8090",
+    api_key="your-api-key",
+    failure_mode=FailureMode.strict_block,
+))
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+resp = client.generate(GenerateRequest(
+    site_id="partner-site-a",
+    type="text",
+    width=320,
+    extra={"device_fingerprint": "fp_xxx"},
+))
 
-#### 参与贡献
+print(resp.data["captcha_id"])
+print(resp.data["verify_ticket"])
+```
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+## 核心能力
 
+- `Client.generate(req)` — 调用开放平台接口生成验证码（后端使用）
+- `Client.verify( req)` — 调用开放平台接口二次校验（后端使用）
+- `GenerateRequest.extra` / `VerifyRequest.extra` — 可透传扩展字段（例如 `device_fingerprint`）
+- `normalize_clicks(points)` — 坐标序列标准化：`[(x,y), ...]` → `[{"x": x, "y": y}, ...]`
+- `X-Log-Id` 自动透传（通过 `Config.log_id_factory` 回调）
+- 业务封禁可感知：`error_enum=E_BANNED`（在 `SDKError` 异常中抛出）
+- 故障策略：
+  - `strict_block`（严格阻断，默认）
+  - `degrade_allow`（降级放行，返回 `{"degraded": true}` 的 `Envelope`）
+  - 约束：`degrade_allow` 仅用于服务不可用场景；`E_BANNED` 不属于放行条件
 
-#### 特技
+## 声明条款
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+1. 商业授权与 API 调用：
+本项目采用 MIT/Apache-2.0 协议开源。使用本项目代码连接到官方 API 服务，不受本协议限制，仅需遵循服务条款。
+
+2. 本地运行与修改：
+允许任何人下载、修改、自用本项目代码。但若您将修改后的代码作为商业产品对外分发（例如打包成 SaaS 售卖、或封装成闭源插件），请务必联系我们获得商业豁免或授权（或说明必须保留我的版权信息）。
+
+3. 免责条款：
+本软件按"现状"提供，作者不对因使用本代码导致的任何数据丢失、服务器故障或法律纠纷承担任何责任。
