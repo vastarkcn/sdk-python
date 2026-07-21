@@ -14,6 +14,8 @@ def main():
         api_key="replace-with-api-key",
         timeout=3.0,
         failure_mode=FailureMode.strict_block,
+        # 可选：从上下文传入当前请求的 trace ID 实现全链路追踪
+        log_id_factory=lambda: "trace-id-from-ctx",
     ))
 
     resp = client.generate(GenerateRequest(

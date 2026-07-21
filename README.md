@@ -17,6 +17,8 @@ client = Client(Config(
     base_url="http://127.0.0.1:8090",
     api_key="your-api-key",
     failure_mode=FailureMode.strict_block,
+    # 可选：传入当前请求的 trace ID，自动作为 X-Log-Id 透传
+    log_id_factory=lambda: "trace-id-from-ctx",
 ))
 
 resp = client.generate(GenerateRequest(
